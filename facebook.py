@@ -124,7 +124,6 @@ class Facebook:
         }
         r = self._client.get(url, headers=headers)
         feedback_id = re.search(r'Plugin","feedback_id":"(.*?)"', r.text).group(1)
-        feedback_id = "t"
 
         headers = {
             "Accept": "*/*",
@@ -157,7 +156,7 @@ class Facebook:
             "fb_dtsg": self._fb_dtsg
         }
         r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
-        if r.json()["errors"]:
+        if not r.json()["data"]["feedback_react"]:
             raise Exception("LIKE_FAILED")
 
     def comment(self, url: str, text: str):
@@ -227,7 +226,7 @@ class Facebook:
             "fb_dtsg": self._fb_dtsg
         }
         r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
-        if r.json()["errors"]:
+        if not r.json()["data"]["comment_create"]:
             raise Exception("COMMENT_FAILED")
 
     def call(self, number: str):
