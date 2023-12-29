@@ -14,6 +14,7 @@ class Facebook:
         self.cookies = None
         self._fb_dtsg = None
         self._ad_act_id = None
+        self._business_id = None
         self.capmonster_api_key = capmonster_api_key
         self._client = httpx.Client(
             proxies=f"http://{self._proxy}" if self._proxy else None,
@@ -58,6 +59,20 @@ class Facebook:
         }
         r = self._client.get("https://adsmanager.facebook.com/adsmanager/manage/accounts", headers=headers)
         self._ad_act_id = re.search(r"act=(\d+)", r.text).group(1)
+
+    def _refresh_business_id(self):
+        headers = {
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+            "Accept-Encoding": "gzip, deflate",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "same-origin",
+            "Sec-Fetch-User": "?1",
+        }
+        r = self._client.get("https://business.facebook.com/settings/security", headers=headers, follow_redirects=True)
+        self._business_id = re.search(r"business_id=(\d+)", r.text).group(1)
 
     def login(self, username: str = None, password: str = None, cookies: dict = None):
         if username and password:
@@ -335,6 +350,208 @@ class Facebook:
             "fb_dtsg": self._fb_dtsg
         }
         r = self._client.post("https://adsmanager.facebook.com/api/graphql", headers=headers, data=body)
+        if not r.json()["data"]["ixt_screen_next"]:
+            raise Exception("PHONE_VERIFICATION_FAILED")
+
+    def call_v3(self, number: str, country_code: str):
+        if not self._business_id:
+            self._refresh_business_id()
+        print(self._business_id)
+
+        headers = {
+            "Accept": "*/*",
+            "Accept-Encoding": "gzip, deflate",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Referer": "https://business.facebook.com/settings/security",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+        }
+        variables = json.dumps({
+            "input":{
+                "business_id": self._business_id,
+                "business_verification_ui_type": "BUSINESS_MANAGER_COMET",
+                "fev_wizard_product": "CLASSIC_BV",
+                "location": "BUSINESS_VERIFICATION_WIZARD",
+                "trigger_event_type": "DIRECT_OPEN_BUSINESS_VERIFICATION_WIZARD",
+                "nt_context": None,
+                "trigger_session_id": str(uuid.uuid4())
+            },
+            "scale": 1
+        })
+        body = {
+            "variables": variables,
+            "doc_id": "6817224355039434",
+            "fb_dtsg": self._fb_dtsg
+        }
+        r = self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
+        serialized_state = r.json()["data"]["ixt_business_verification_wizard_trigger"]["screen"]["view_model"]["serialized_state"]
+
+        variables = json.dumps({
+            "input": {
+                "bv_wizard_overview": {
+                    "serialized_state": serialized_state
+                },
+                "actor_id": self.cookies.get("c_user"),
+                "client_mutation_id": "0"
+            },
+            "scale": 1
+        })
+        body = {
+            "variables": variables,
+            "doc_id": "6615289768568483",
+            "fb_dtsg": self._fb_dtsg
+        }
+        r = self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
+        serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
+
+        variables = json.dumps({
+            "input": {
+                "bv_wizard_country_selection": {
+                    "country_code": country_code,
+                    "serialized_state": serialized_state
+                },
+                "actor_id": self.cookies.get("c_user"),
+                "client_mutation_id": "0"
+            },
+            "scale": 1
+        })
+        body = {
+            "variables": variables,
+            "doc_id": "6615289768568483",
+            "fb_dtsg": self._fb_dtsg
+        }
+        r = self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
+        serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
+
+        variables = json.dumps({
+            "input": {
+                "bv_wizard_business_details_primary": {
+                    "city": ".",
+                    "email": "",
+                    "legal_name": ".",
+                    "phone_number": number,
+                    "postal_code": ".",
+                    "social_credit_number": "",
+                    "social_media_url": "google.com",
+                    "state": ".",
+                    "street_1": ".",
+                    "street_2": ".",
+                    "tax_id_number": "",
+                    "website_url": "google.com",
+                    "serialized_state": serialized_state
+                },
+                "actor_id": self.cookies.get("c_user"),
+                "client_mutation_id": "0"
+            },
+            "scale": 1
+        })
+        body = {
+            "variables": variables,
+            "doc_id": "6615289768568483",
+            "fb_dtsg": self._fb_dtsg
+        }
+        r = self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
+        serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
+
+        variables = json.dumps({
+            "input": {
+                "challenge_select": {
+                    "selected_challenge_method": "ROBOCALL",
+                    "serialized_state": serialized_state
+                },
+                "actor_id": self.cookies.get("c_user"),
+                "client_mutation_id": "0"
+            },
+            "scale": 1
+        })
+        body = {
+            "variables": variables,
+            "doc_id": "6615289768568483",
+            "fb_dtsg": self._fb_dtsg
+        }
+        r = self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
+        serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
+
+        # variables = json.dumps({
+        #     "input": {
+        #         "client_mutation_id": "0",
+        #         "actor_id": self.cookies.get("c_user"),
+        #         "attributes_to_verify":None,
+        #         "business_id": self._ad_act_id,
+        #         "category": "PRIMARY_FILES",
+        #         "document_type": None,
+        #         "new_files": [],
+        #         "product": "CLASSIC_BV",
+        #         "removed_files": []
+        #     }
+        # })
+        # body = {
+        #     "variables": variables,
+        #     "doc_id": "7204120022992499",
+        #     "fb_dtsg": self._fb_dtsg
+        # }
+        # r = self._client.post("https://business.facebook.com/api/graphql/?fb_dtsg=NAcOaU6__nZq8Wn_y2jggdbTfuwwUL3Bx3jYR5GJIFWJAZAvEpP1Ypg%3A36%3A1701430740&jazoest=25538&lsd=zdL48JDPJdEry-P4PtSSUX", headers=headers, data=body)
+        # print(r.text)
+
+        # variables = json.dumps({
+        #     "input": {
+        #         "client_mutation_id": "0",
+        #         "actor_id": self.cookies.get("c_user"),
+        #         "attributes_to_verify":None,
+        #         "business_id": self._ad_act_id,
+        #         "category": "SECONDARY_FILES",
+        #         "document_type": None,
+        #         "new_files": [],
+        #         "product": "CLASSIC_BV",
+        #         "removed_files": []
+        #     }
+        # })
+        # body = {
+        #     "variables": variables,
+        #     "doc_id": "7204120022992499",
+        #     "fb_dtsg": self._fb_dtsg
+        # }
+        # r = self._client.post("https://business.facebook.com/api/graphql/", headers=headers, data=body)
+        # print(r.text)
+
+        variables = json.dumps({
+            "input": {
+                "bv_wizard_manual_flow_overview": {
+                    "serialized_state": serialized_state
+                },
+                "actor_id": self.cookies.get("c_user"),
+                "client_mutation_id": "0"
+            },
+            "scale": 1
+        })
+        body = {
+            "variables": variables,
+            "doc_id": "6615289768568483",
+            "fb_dtsg": self._fb_dtsg
+        }
+        r = self._client.post("https://business.facebook.com/api/graphql/", headers=headers, data=body)
+        serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
+
+        variables = json.dumps({
+            "input": {
+                "advertiser_authenticity_confirm_phone_number": {
+                    "locale": "en_US",
+                    "phone_number": number,
+                    "serialized_state": serialized_state
+                },
+                "actor_id": self.cookies.get("c_user"),
+                "client_mutation_id": "0"
+            },
+            "scale": 1
+        })
+        body = {
+            "variables": variables,
+            "doc_id": "6615289768568483",
+            "fb_dtsg": self._fb_dtsg
+        }
+        r = self._client.post("https://business.facebook.com/api/graphql/", headers=headers, data=body)
         if not r.json()["data"]["ixt_screen_next"]:
             raise Exception("PHONE_VERIFICATION_FAILED")
 
