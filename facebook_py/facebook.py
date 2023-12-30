@@ -8,6 +8,7 @@ import uuid
 import re
 from fake_useragent import UserAgent
 
+
 class Facebook:
     def __init__(self, capmonster_api_key: str = None, proxy: str = None):
         self._proxy = proxy
@@ -71,7 +72,7 @@ class Facebook:
             "Sec-Fetch-Site": "same-origin",
             "Sec-Fetch-User": "?1",
         }
-        r = self._client.get("https://business.facebook.com/settings/security", headers=headers, follow_redirects=True)
+        r = self._client.get("https://business.facebook.com/home/accounts", headers=headers)
         self._business_id = re.search(r"business_id=(\d+)", r.text).group(1)
 
     def login(self, username: str = None, password: str = None, cookies: dict = None):
@@ -119,7 +120,7 @@ class Facebook:
 
             self.cookies = dict(self._client.cookies)
         if cookies:
-            self.cookies = cookies
+            self.cookies = json.loads(cookies)
             self._client.cookies.update(self.cookies)
 
         self._refresh_fb_dtsg()
@@ -244,7 +245,7 @@ class Facebook:
         if not r.json()["data"]["comment_create"]:
             raise Exception("COMMENT_FAILED")
 
-    def call(self, number: str, sms: bool = False):
+    def contact(self, number: str, sms: bool = False):
         capmonster = RecaptchaV2Task(self.capmonster_api_key)
         task_id = capmonster.create_task("https://www.fbsbx.com/captcha/recaptcha/iframe", "6Lc9qjcUAAAAADTnJq5kJMjN9aD1lxpRLMnCS2TR")
         captcha_token = capmonster.join_task_result(task_id)["gRecaptchaResponse"]
@@ -278,7 +279,7 @@ class Facebook:
         if status != "SUCCEED":
             raise Exception(status)
 
-    def call_v2(self, number: str, country_code: str):
+    def contact_v2(self, number: str, country_code: str, sms: bool = False):
         if not self._ad_act_id:
             self._refresh_ad_act_id()
 
@@ -336,7 +337,7 @@ class Facebook:
         variables = json.dumps({
             "input": {
                 "challenge_select": {
-                    "selected_challenge_method": "ROBOCALL",
+                    "selected_challenge_method": "SMS" if sms else "ROBOCALL",
                     "serialized_state": serialized_state
                 },
                 "actor_id": self.cookies.get("c_user"),
@@ -353,7 +354,7 @@ class Facebook:
         if not r.json()["data"]["ixt_screen_next"]:
             raise Exception("PHONE_VERIFICATION_FAILED")
 
-    def call_v3(self, number: str, country_code: str, sms: bool = False):
+    def contact_v3(self, number: str, country_code: str, sms: bool = False):
         if not self._business_id:
             self._refresh_business_id()
 
