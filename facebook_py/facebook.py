@@ -20,7 +20,6 @@ class Facebook:
         self._client = httpx.Client(
             proxies=f"http://{self._proxy}" if self._proxy else None,
             timeout=httpx.Timeout(5.0, read=30.0),
-            transport=httpx.HTTPTransport(retries=3),
             follow_redirects=True
         )
         ua = UserAgent()
