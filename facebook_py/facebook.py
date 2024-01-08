@@ -12,7 +12,7 @@ from fake_useragent import UserAgent
 class Facebook:
     def __init__(self, capmonster_api_key: str = None, proxy: str = None):
         self._proxy = proxy
-        self.cookies = None
+        self.session = None
         self._fb_dtsg = None
         self._ad_act_id = None
         self._business_id = None
