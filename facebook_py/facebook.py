@@ -74,7 +74,7 @@ class Facebook:
         r = self._client.get("https://business.facebook.com/home/accounts", headers=headers)
         self._business_id = re.search(r"business_id=(\d+)", r.text).group(1)
 
-    def login(self, username: str = None, password: str = None, cookies: dict = None):
+    def login(self, username: str = None, password: str = None, session: dict = None):
         if username and password:
             headers = {
                 "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
@@ -117,10 +117,10 @@ class Facebook:
             if "c_user" not in dict(r.cookies) or "xs" not in dict(r.cookies):
                 raise Exception("LOGIN_FAILED")
 
-            self.cookies = dict(self._client.cookies)
+            self.session = dict(self._client.cookies)
         if cookies:
-            self.cookies = json.loads(cookies)
-            self._client.cookies.update(self.cookies)
+            self.session = json.loads(session)
+            self._client.cookies.update(self.session)
 
         self._refresh_fb_dtsg()
 
