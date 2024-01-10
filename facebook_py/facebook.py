@@ -118,7 +118,7 @@ class Facebook:
                 raise Exception("LOGIN_FAILED")
 
             self.session = dict(self._client.cookies)
-        if cookies:
+        if session:
             self.session = json.loads(session)
             self._client.cookies.update(self.session)
 
