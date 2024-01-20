@@ -159,7 +159,7 @@ class Facebook:
                 "is_tracking_encrypted": True,
                 "tracking": [],
                 "session_id": str(uuid.uuid4()),
-                "actor_id": self.cookies.get("c_user"),
+                "actor_id": self.session.get("c_user"),
                 "client_mutation_id": "0"
             },
             "useDefaultActor": False,
@@ -226,7 +226,7 @@ class Facebook:
                 "feedback_source": "MEDIA_VIEWER",
                 "idempotence_token": f"client:{str(uuid.uuid4())}",
                 "session_id": str(uuid.uuid4()),
-                "actor_id": self.cookies.get("c_user"),
+                "actor_id": self.session.get("c_user"),
                 "client_mutation_id": "0"
             },
             "inviteShortLinkKey": None,
@@ -320,7 +320,7 @@ class Facebook:
                     "phone_number": number,
                     "serialized_state": serialized_state
                 },
-                "actor_id": self.cookies.get("c_user"),
+                "actor_id": self.session.get("c_user"),
                 "client_mutation_id": "0"
             },
             "scale": 1
@@ -339,7 +339,7 @@ class Facebook:
                     "selected_challenge_method": "SMS" if sms else "ROBOCALL",
                     "serialized_state": serialized_state
                 },
-                "actor_id": self.cookies.get("c_user"),
+                "actor_id": self.session.get("c_user"),
                 "client_mutation_id": "0"
             },
             "scale": 1
@@ -392,7 +392,7 @@ class Facebook:
                 "bv_wizard_overview": {
                     "serialized_state": serialized_state
                 },
-                "actor_id": self.cookies.get("c_user"),
+                "actor_id": self.session.get("c_user"),
                 "client_mutation_id": "0"
             },
             "scale": 1
@@ -411,7 +411,7 @@ class Facebook:
                     "country_code": country_code,
                     "serialized_state": serialized_state
                 },
-                "actor_id": self.cookies.get("c_user"),
+                "actor_id": self.session.get("c_user"),
                 "client_mutation_id": "0"
             },
             "scale": 1
@@ -441,7 +441,7 @@ class Facebook:
                     "website_url": "google.com",
                     "serialized_state": serialized_state
                 },
-                "actor_id": self.cookies.get("c_user"),
+                "actor_id": self.session.get("c_user"),
                 "client_mutation_id": "0"
             },
             "scale": 1
@@ -460,7 +460,7 @@ class Facebook:
                     "selected_challenge_method": "SMS" if sms else "ROBOCALL",
                     "serialized_state": serialized_state
                 },
-                "actor_id": self.cookies.get("c_user"),
+                "actor_id": self.session.get("c_user"),
                 "client_mutation_id": "0"
             },
             "scale": 1
@@ -476,7 +476,7 @@ class Facebook:
         # variables = json.dumps({
         #     "input": {
         #         "client_mutation_id": "0",
-        #         "actor_id": self.cookies.get("c_user"),
+        #         "actor_id": self.session.get("c_user"),
         #         "attributes_to_verify":None,
         #         "business_id": self._ad_act_id,
         #         "category": "PRIMARY_FILES",
@@ -497,7 +497,7 @@ class Facebook:
         # variables = json.dumps({
         #     "input": {
         #         "client_mutation_id": "0",
-        #         "actor_id": self.cookies.get("c_user"),
+        #         "actor_id": self.session.get("c_user"),
         #         "attributes_to_verify":None,
         #         "business_id": self._ad_act_id,
         #         "category": "SECONDARY_FILES",
@@ -520,7 +520,7 @@ class Facebook:
                 "bv_wizard_manual_flow_overview": {
                     "serialized_state": serialized_state
                 },
-                "actor_id": self.cookies.get("c_user"),
+                "actor_id": self.session.get("c_user"),
                 "client_mutation_id": "0"
             },
             "scale": 1
@@ -536,11 +536,11 @@ class Facebook:
         variables = json.dumps({
             "input": {
                 "advertiser_authenticity_confirm_phone_number": {
-                    "locale": "en_US",
+                    "locale": "ar_AR",
                     "phone_number": number,
                     "serialized_state": serialized_state
                 },
-                "actor_id": self.cookies.get("c_user"),
+                "actor_id": self.session.get("c_user"),
                 "client_mutation_id": "0"
             },
             "scale": 1
