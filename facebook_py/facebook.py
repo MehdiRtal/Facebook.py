@@ -473,48 +473,6 @@ class Facebook:
         r = self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
         serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
 
-        # variables = json.dumps({
-        #     "input": {
-        #         "client_mutation_id": "0",
-        #         "actor_id": self.session.get("c_user"),
-        #         "attributes_to_verify":None,
-        #         "business_id": self._ad_act_id,
-        #         "category": "PRIMARY_FILES",
-        #         "document_type": None,
-        #         "new_files": [],
-        #         "product": "CLASSIC_BV",
-        #         "removed_files": []
-        #     }
-        # })
-        # body = {
-        #     "variables": variables,
-        #     "doc_id": "7204120022992499",
-        #     "fb_dtsg": self._fb_dtsg
-        # }
-        # r = self._client.post("https://business.facebook.com/api/graphql/?fb_dtsg=NAcOaU6__nZq8Wn_y2jggdbTfuwwUL3Bx3jYR5GJIFWJAZAvEpP1Ypg%3A36%3A1701430740&jazoest=25538&lsd=zdL48JDPJdEry-P4PtSSUX", headers=headers, data=body)
-        # print(r.text)
-
-        # variables = json.dumps({
-        #     "input": {
-        #         "client_mutation_id": "0",
-        #         "actor_id": self.session.get("c_user"),
-        #         "attributes_to_verify":None,
-        #         "business_id": self._ad_act_id,
-        #         "category": "SECONDARY_FILES",
-        #         "document_type": None,
-        #         "new_files": [],
-        #         "product": "CLASSIC_BV",
-        #         "removed_files": []
-        #     }
-        # })
-        # body = {
-        #     "variables": variables,
-        #     "doc_id": "7204120022992499",
-        #     "fb_dtsg": self._fb_dtsg
-        # }
-        # r = self._client.post("https://business.facebook.com/api/graphql/", headers=headers, data=body)
-        # print(r.text)
-
         variables = json.dumps({
             "input": {
                 "bv_wizard_manual_flow_overview": {
