@@ -268,11 +268,11 @@ class Facebook:
                     "legal_name": "Mehdi",
                     "website": "https://mehdi.mehdi",
                     "address": {
-                        "country": "AM"
+                        "country": "MA"
                     }
                 },
                 "app_id": "1593811571129902",
-                "log_session_id": "6e71e5ad-c20a-4ce9-8938-d463cc76df0e"
+                "log_session_id": str(uuid.uuid4())
             }
         })
         body = {
@@ -281,6 +281,7 @@ class Facebook:
             "fb_dtsg": self._fb_dtsg
         }
         r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
+        print(r.status_code)
         business_id = r.json()["data"]["xfb_create_meta_business_account"]["id"]
 
         variables = json.dumps({
@@ -288,7 +289,7 @@ class Facebook:
                 "client_mutation_id": "2",
                 "actor_id": self.session.get("c_user"),
                 "app_id": "1593811571129902",
-                "log_session_id": "6e71e5ad-c20a-4ce9-8938-d463cc76df0e",
+                "log_session_id": str(uuid.uuid4()),
                 "business_id": business_id,
                 "api_account_type": "EMBEDDED_SIGNUP",
                 "creation_source": "EMBEDDED_SIGNUP",
@@ -309,6 +310,7 @@ class Facebook:
             "fb_dtsg": self._fb_dtsg
         }
         r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
+        print(r.status_code)
         print(r.json())
 
     def contact(self, number: str, sms: bool = False):
