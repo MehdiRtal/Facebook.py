@@ -244,6 +244,45 @@ class Facebook:
         if not r.json()["data"]["comment_create"]:
             raise Exception("COMMENT_FAILED")
 
+    def verify(self):
+        headers = {
+            "Accept": "*/*",
+            "Accept-Encoding": "gzip, deflate",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Content-Type": "application/x-www-form-urlencoded",
+            # "Referer": "https://web.facebook.com/v16.0/dialog/oauth?encrypted_query_string=AeDfBkldn5Udsdf1e4ByFQe9Y6oqv0A9acLWYfNjpeKj-X-kjYnY6djId_U1GX8EQ-ybdu7BzICrbLNl54y-irrnRxWPzMwWCDIhrUbB_mg79UdUyuWVhl46qa99uaRGU7J-ZjCXe8eTatcm3_O0Sb_IibuR67bV62e2u8C-Jy5W-4ucz9XhbHnr7WYsAbFtrP-_xxm1xt9yRSmwokr2BEubMlHAlGTHuqoTzlOYOT2qCgNq5ZbdqA3rGVN6NGjtS013I6IPA7ET7m8E6RY-rdK8MSY943W10gdfPotXewJktGtFqYnFk2dD3eHZ634RU1t3GplvEo5AQO4-L4FqzOnEj9fdsa1GQ-gONvYRkIM7BFN2yNDCCTkvAE_WBaQk3IBes06HbSLGTmqdFeHMqBUOdHyqnxUSBg3RP3bujA3SyA7TLStiwVUkyAeVdsMRvY5HsuOm3CBZBi8p4G73x2aOonh6g1Q1oOE2BaOijIqe7ZWXF6pGtNLNCPHvY0bhvKFpSVYYCLxvlL0mNOPY_yM1qu3q43gqBQjOCPlRVSYm2JGQdXR8-Ck3ReInS16tA25FVRaf7YYzugEn0yF84eRmg4qQ5sJC0vyyCB2EmyumL4wTjKSEAqstPhBG7R-XIR8Txipf80_5aHJMdvttOGoD8fTuNbohHoQ_8EEHmK1x5GKqT-kdu8Tf41Kb4edQ_u3UykCy97efbna2c6kpWW003RMydgtBejEJPw3uZT-5NzllznF6zInz_VzHyeBlelCDF_m3MQ1Hb-JCp2vSAVLpUzR_9FDWNTCX6M6RdMY-pBjVjqhf_4nH0FRDDS7wINuPGW0hyLF4-YC-2M_YC4amHF-uYvD82pQCPtW1qVaZueLZs6YjnTShocrHsU5Hcaf8N8x8Ggypeo9wqh8z9XiEVrxDuc0YFz-za1EE-LLQEFjuOef-ZXc_BfVzERJ9-cvb4_vQsKT2KeyaucS2IKGhhUVbFjoroWB-ToOa5mZit3BOE2yzIUuWkLZXw8t8V4ASRksRvLMP9j0yN39xSXt4_I63AYEaHafHVs4Mvbmmljf74htfK7yYTbZ9u6iJug0gc18E3KSWhhfBvDIilxfQe-5M1ObMxBlav1pYH2NRxL5XCs9yHta7Benn7ED2mJ2bUmgEq0LD3uyId2uWFSA1FWKkWt2SDFNQGYeVUFUHxBRwbDTdcmNtXQCzAy3lBd6boakpIXCPknm6k64zVX_KzYbGZmM057Ol4hj3cj_mHN2Un7nj2Zd3z3Zu5EgdBPz72XB01BRc5KxCi3odYhZwXlrl4dAlFt7NHiI2WDAoddF2ZLSWKXb5CaBsX5WMxris0P-C5WOtRvcq6rIjQh_wt7gTSeFr-FHccpifiBJSXa-LOH7G3VEJ5-slKWSEjl2M9etvyinRDeMv7loSR5YQnvQROX33usWYQTjLW8ykTWFrXf6FS2791QW6d1Z8rW20ufZ8ZzQSZOae0l_7K-iSy-Vvp67lW-Xnm0QinuLlK8H60hobZBVIjgVRfrghexs2Gl74tS-5fHcmRXRDCplitimj15UV-9JHlxKWaUTIzAG309wvxNZL2AvJ2fAx5RnxhtWuVSpJIV-CTpSCgAsAZyg9luCmn12BWTwE1SWTzradNdOB1BEBrboI4SdpKbqC-XXi81kwklK2gHOFZUAy0qBiebHsJTipqIfWfIntgqAltDh-hOdIRrcuLhnfi6pNuV-RT1ytIwsDNNcVju4AVokZr-Hn8WCFNnwetx_SPqhkSWlsccyMkye2RKm4M4zrOkWG09vC-_1Qukkt5UdHSUn4JSwu9-D9t4UUX3JfukwEZ0M_jvnJ87_TGPuxVrWakcVZKr8ElnE1tBLOwGSjTZbCAUe56iIYxLMGiHnHiE_u7jXQoJJ-DI03HoUEA-VNXOiU5bW0Gdj59kSxa1jbmbWleQ7z8jeTMXWRaVoeHOx-HoOOHkuUABoyYoujS9_Cx6h3g9LltY15yN68OpwWFInwVD2wAEvHfvHa8VZZgwSAUJhrWFMx2Zq4cbt81cY3w45ovWm4y7vVm94zlkt9l_91SmHNoIg&_rdc=1&_rdr",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+        }
+        variables = json.dumps({"input":{"app_id":"1593811571129902","log_session_id":"72aaacdd-974e-4d92-8305-b81eaa095372","partner_business_id":235609652134321,"preverified_phone_number_ids":None}})
+        body = {
+            "variables": variables,
+            "doc_id": "8639807102758777",
+            "fb_dtsg": self._fb_dtsg
+        }
+        r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
+        print(r.json())
+
+        headers = {
+            "Accept": "*/*",
+            "Accept-Encoding": "gzip, deflate",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Content-Type": "application/x-www-form-urlencoded",
+            # "Referer": "https://web.facebook.com/v16.0/dialog/oauth?encrypted_query_string=AeDfBkldn5Udsdf1e4ByFQe9Y6oqv0A9acLWYfNjpeKj-X-kjYnY6djId_U1GX8EQ-ybdu7BzICrbLNl54y-irrnRxWPzMwWCDIhrUbB_mg79UdUyuWVhl46qa99uaRGU7J-ZjCXe8eTatcm3_O0Sb_IibuR67bV62e2u8C-Jy5W-4ucz9XhbHnr7WYsAbFtrP-_xxm1xt9yRSmwokr2BEubMlHAlGTHuqoTzlOYOT2qCgNq5ZbdqA3rGVN6NGjtS013I6IPA7ET7m8E6RY-rdK8MSY943W10gdfPotXewJktGtFqYnFk2dD3eHZ634RU1t3GplvEo5AQO4-L4FqzOnEj9fdsa1GQ-gONvYRkIM7BFN2yNDCCTkvAE_WBaQk3IBes06HbSLGTmqdFeHMqBUOdHyqnxUSBg3RP3bujA3SyA7TLStiwVUkyAeVdsMRvY5HsuOm3CBZBi8p4G73x2aOonh6g1Q1oOE2BaOijIqe7ZWXF6pGtNLNCPHvY0bhvKFpSVYYCLxvlL0mNOPY_yM1qu3q43gqBQjOCPlRVSYm2JGQdXR8-Ck3ReInS16tA25FVRaf7YYzugEn0yF84eRmg4qQ5sJC0vyyCB2EmyumL4wTjKSEAqstPhBG7R-XIR8Txipf80_5aHJMdvttOGoD8fTuNbohHoQ_8EEHmK1x5GKqT-kdu8Tf41Kb4edQ_u3UykCy97efbna2c6kpWW003RMydgtBejEJPw3uZT-5NzllznF6zInz_VzHyeBlelCDF_m3MQ1Hb-JCp2vSAVLpUzR_9FDWNTCX6M6RdMY-pBjVjqhf_4nH0FRDDS7wINuPGW0hyLF4-YC-2M_YC4amHF-uYvD82pQCPtW1qVaZueLZs6YjnTShocrHsU5Hcaf8N8x8Ggypeo9wqh8z9XiEVrxDuc0YFz-za1EE-LLQEFjuOef-ZXc_BfVzERJ9-cvb4_vQsKT2KeyaucS2IKGhhUVbFjoroWB-ToOa5mZit3BOE2yzIUuWkLZXw8t8V4ASRksRvLMP9j0yN39xSXt4_I63AYEaHafHVs4Mvbmmljf74htfK7yYTbZ9u6iJug0gc18E3KSWhhfBvDIilxfQe-5M1ObMxBlav1pYH2NRxL5XCs9yHta7Benn7ED2mJ2bUmgEq0LD3uyId2uWFSA1FWKkWt2SDFNQGYeVUFUHxBRwbDTdcmNtXQCzAy3lBd6boakpIXCPknm6k64zVX_KzYbGZmM057Ol4hj3cj_mHN2Un7nj2Zd3z3Zu5EgdBPz72XB01BRc5KxCi3odYhZwXlrl4dAlFt7NHiI2WDAoddF2ZLSWKXb5CaBsX5WMxris0P-C5WOtRvcq6rIjQh_wt7gTSeFr-FHccpifiBJSXa-LOH7G3VEJ5-slKWSEjl2M9etvyinRDeMv7loSR5YQnvQROX33usWYQTjLW8ykTWFrXf6FS2791QW6d1Z8rW20ufZ8ZzQSZOae0l_7K-iSy-Vvp67lW-Xnm0QinuLlK8H60hobZBVIjgVRfrghexs2Gl74tS-5fHcmRXRDCplitimj15UV-9JHlxKWaUTIzAG309wvxNZL2AvJ2fAx5RnxhtWuVSpJIV-CTpSCgAsAZyg9luCmn12BWTwE1SWTzradNdOB1BEBrboI4SdpKbqC-XXi81kwklK2gHOFZUAy0qBiebHsJTipqIfWfIntgqAltDh-hOdIRrcuLhnfi6pNuV-RT1ytIwsDNNcVju4AVokZr-Hn8WCFNnwetx_SPqhkSWlsccyMkye2RKm4M4zrOkWG09vC-_1Qukkt5UdHSUn4JSwu9-D9t4UUX3JfukwEZ0M_jvnJ87_TGPuxVrWakcVZKr8ElnE1tBLOwGSjTZbCAUe56iIYxLMGiHnHiE_u7jXQoJJ-DI03HoUEA-VNXOiU5bW0Gdj59kSxa1jbmbWleQ7z8jeTMXWRaVoeHOx-HoOOHkuUABoyYoujS9_Cx6h3g9LltY15yN68OpwWFInwVD2wAEvHfvHa8VZZgwSAUJhrWFMx2Zq4cbt81cY3w45ovWm4y7vVm94zlkt9l_91SmHNoIg&_rdc=1&_rdr",
+            "Sec-Fetch-Dest": "empty",
+            "Sec-Fetch-Mode": "cors",
+            "Sec-Fetch-Site": "same-origin",
+        }
+        variables = json.dumps({})
+        body = {
+            "variables": variables,
+            "doc_id": "8639807102758777",
+            "fb_dtsg": self._fb_dtsg
+        }
+        r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
+        print(r.json())
+
     def contact(self, number: str, sms: bool = False):
         capmonster = RecaptchaV2Task(self.capmonster_api_key)
         task_id = capmonster.create_task("https://www.fbsbx.com/captcha/recaptcha/iframe", "6Lc9qjcUAAAAADTnJq5kJMjN9aD1lxpRLMnCS2TR")
