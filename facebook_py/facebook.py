@@ -281,7 +281,7 @@ class Facebook:
             "fb_dtsg": self._fb_dtsg
         }
         r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
-        print(r.status_code)
+        r.raise_for_status()
         business_id = r.json()["data"]["xfb_create_meta_business_account"]["id"]
 
         variables = json.dumps({
@@ -310,8 +310,7 @@ class Facebook:
             "fb_dtsg": self._fb_dtsg
         }
         r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
-        print(r.status_code)
-        print(r.json())
+        r.raise_for_status()
 
     def contact(self, number: str, sms: bool = False):
         capmonster = RecaptchaV2Task(self.capmonster_api_key)
