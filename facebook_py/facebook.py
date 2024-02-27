@@ -262,12 +262,12 @@ class Facebook:
                 "business_name": "Mehdi",
                 "first_name": "Mehdi",
                 "last_name": "Mehdi",
-                "email_address": "mehdi@mehdi.mehdi",
+                "email_address": "mehdi@gmail.com",
                 "creation_source": "WHATSAPP_BUSINESS_API_EMBEDDED_SIGNUP",
                 "entry_point": "WHATSAPP_BUSINESS_ONBOARDING_EMBEDDED_SIGNUP_BUSINESS_ACCOUNT",
                 "business_profile": {
                     "legal_name": "Mehdi",
-                    "website": "https://mehdi.mehdi",
+                    "website": "https://mehdi.com",
                     "address": {
                         "country": "MA"
                     }
