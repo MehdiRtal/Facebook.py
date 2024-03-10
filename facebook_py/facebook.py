@@ -6,7 +6,8 @@ from capmonster_python import RecaptchaV2Task
 import time
 import uuid
 import re
-from fake_useragent import UserAgent
+from fake_useragent import FakeUserAgent
+from randomuser import RandomUser
 
 
 class Facebook:
@@ -23,7 +24,7 @@ class Facebook:
             timeout=httpx.Timeout(5.0, read=30.0),
             follow_redirects=True
         )
-        ua = UserAgent()
+        ua = FakeUserAgent(platforms="pc")
         self._client.headers.update({
             "User-Agent": ua.chrome
         })
@@ -255,21 +256,22 @@ class Facebook:
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin",
         }
+        user = RandomUser()
         variables = json.dumps({
             "input": {
                 "client_mutation_id": "1",
                 "actor_id": self.session.get("c_user"),
-                "business_name": "Mehdi",
-                "first_name": "Mehdi",
-                "last_name": "Mehdi",
-                "email_address": "mehdi@gmail.com",
+                "business_name": user.get_full_name(),
+                "first_name": user.get_first_name(),
+                "last_name": user.get_last_name(),
+                "email_address": f"{user.get_username()}@gmail.com",
                 "creation_source": "WHATSAPP_BUSINESS_API_EMBEDDED_SIGNUP",
                 "entry_point": "WHATSAPP_BUSINESS_ONBOARDING_EMBEDDED_SIGNUP_BUSINESS_ACCOUNT",
                 "business_profile": {
-                    "legal_name": "Mehdi",
-                    "website": "https://mehdi.com",
+                    "legal_name": user.get_full_name(),
+                    "website": f"https://{user.get_username()}.com",
                     "address": {
-                        "country": "MA"
+                        "country": user.get_nat()
                     }
                 },
                 "app_id": "1593811571129902",
