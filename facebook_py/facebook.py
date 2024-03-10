@@ -26,7 +26,7 @@ class Facebook:
         )
         ua = FakeUserAgent(platforms="pc")
         self._client.headers.update({
-            "User-Agent": ua.chrome
+            "User-Agent": ua.chrome[:-1]
         })
 
     def _refresh_fb_dtsg(self):
