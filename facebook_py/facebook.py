@@ -24,9 +24,12 @@ class Facebook:
             timeout=httpx.Timeout(5.0, read=30.0),
             follow_redirects=True
         )
-        ua = FakeUserAgent(platforms="pc")
+        ua = FakeUserAgent(browsers="chrome", platforms="pc")
+        user_agent = ua.random
+        if user_agent.endswith(" "):
+            user_agent = user_agent[:-1]
         self._client.headers.update({
-            "User-Agent": ua.chrome[:-1]
+            "User-Agent": user_agent
         })
 
     def _refresh_fb_dtsg(self):
