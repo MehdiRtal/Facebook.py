@@ -1,6 +1,5 @@
 import json
 import httpx
-import urllib.parse
 from bs4 import BeautifulSoup
 from capmonster_python import RecaptchaV2Task
 import time
@@ -19,9 +18,9 @@ class Facebook:
         self._serialized_state = None
         self._capmonster_api_key = capmonster_api_key
         self.session = None
-        self._client = httpx.Client(
+        self._client = httpx.AsyncClient(
             proxies=f"http://{self._proxy}" if self._proxy else None,
-            timeout=httpx.Timeout(5.0, read=30.0),
+            timeout=httpx.Timeout(5, read=30),
             follow_redirects=True
         )
         ua = FakeUserAgent(browsers="chrome", platforms="pc")
@@ -29,21 +28,19 @@ class Facebook:
         if user_agent.endswith(" "):
             user_agent = user_agent[:-1]
         self._client.headers.update({
+            # "Accept-Language": "en-US,en;q=0.9",
             "User-Agent": user_agent
         })
 
-    def _refresh_fb_dtsg(self):
+    async def _refresh_fb_dtsg(self):
         headers = {
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "Accept-Encoding": "gzip, deflate",
-            "Accept-Language": "en-US,en;q=0.9",
             "Upgrade-Insecure-Requests": "1",
             "Sec-Fetch-Dest": "document",
             "Sec-Fetch-Mode": "navigate",
             "Sec-Fetch-Site": "same-origin",
             "Sec-Fetch-User": "?1",
         }
-        r = self._client.get("https://web.facebook.com/&", headers=headers)
+        r = await self._client.get("https://web.facebook.com/&", headers=headers)
         if "checkpoint" in str(r.url):
             raise Exception("CHECKPOINT")
         try:
@@ -51,47 +48,38 @@ class Facebook:
         except Exception:
             raise Exception("LOGIN_FAILED")
 
-    def _refresh_ad_act_id(self):
+    async def _refresh_ad_act_id(self):
         headers = {
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "Accept-Encoding": "gzip, deflate",
-            "Accept-Language": "en-US,en;q=0.9",
             "Upgrade-Insecure-Requests": "1",
             "Sec-Fetch-Dest": "document",
             "Sec-Fetch-Mode": "navigate",
             "Sec-Fetch-Site": "same-origin",
             "Sec-Fetch-User": "?1",
         }
-        r = self._client.get("https://adsmanager.facebook.com/adsmanager/manage/accounts", headers=headers)
+        r = await self._client.get("https://adsmanager.facebook.com/adsmanager/manage/accounts", headers=headers)
         self._ad_act_id = re.search(r"act=(\d+)", r.text).group(1)
 
-    def _refresh_business_id(self):
+    async def _refresh_business_id(self):
         headers = {
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-            "Accept-Encoding": "gzip, deflate",
-            "Accept-Language": "en-US,en;q=0.9",
             "Upgrade-Insecure-Requests": "1",
             "Sec-Fetch-Dest": "document",
             "Sec-Fetch-Mode": "navigate",
             "Sec-Fetch-Site": "same-origin",
             "Sec-Fetch-User": "?1",
         }
-        r = self._client.get("https://business.facebook.com/home/accounts", headers=headers)
+        r = await self._client.get("https://business.facebook.com/home/accounts", headers=headers)
         self._business_id = re.search(r"business_id=(\d+)", r.text).group(1)
 
-    def login(self, username: str = None, password: str = None, session: dict = None):
+    async def login(self, username: str = None, password: str = None, session: dict = None):
         if username and password:
             headers = {
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-                "Accept-Encoding": "gzip, deflate",
-                "Accept-Language": "en-US,en;q=0.9",
                 "Upgrade-Insecure-Requests": "1",
                 "Sec-Fetch-Dest": "document",
                 "Sec-Fetch-Mode": "navigate",
                 "Sec-Fetch-Site": "same-origin",
                 "Sec-Fetch-User": "?1"
             }
-            r = self._client.get("https://web.facebook.com/", headers=headers)
+            r = await self._client.get("https://web.facebook.com/", headers=headers)
             privacy_mutation_token = re.search(r'privacy_mutation_token=(.*?)"', r.text).group(1)
             self._client.cookies.update({"datr": re.search(r'"_js_datr","(.*?)"', r.text).group(1)})
             soup = BeautifulSoup(r.text, "html.parser")
@@ -99,26 +87,22 @@ class Facebook:
             jazoest = soup.find("input", {"name": "jazoest"}).get("value")
 
             headers = {
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-                "Accept-Encoding": "gzip, deflate",
-                "Accept-Language": "en-US,en;q=0.9",
                 "Referer": "https://web.facebook.com/",
-                "Content-Type": "application/x-www-form-urlencoded",
                 "Upgrade-Insecure-Requests": "1",
                 "Sec-Fetch-Dest": "document",
                 "Sec-Fetch-Mode": "navigate",
                 "Sec-Fetch-Site": "same-origin",
                 "Sec-Fetch-User": "?1",
             }
-            body = urllib.parse.urlencode({
+            body = {
                 "jazoest": jazoest,
                 "lsd": lsd,
                 "email": username,
                 "login_source": "comet_headerless_login",
                 "next": "",
                 "encpass": f"#PWD_BROWSER:0:{round(time.time())}:{password}",
-            })
-            r = self._client.post(f"https://web.facebook.com/login/?privacy_mutation_token={privacy_mutation_token}", headers=headers, data=body, follow_redirects=False)
+            }
+            r = await self._client.post(f"https://web.facebook.com/login/?privacy_mutation_token={privacy_mutation_token}", headers=headers, data=body, follow_redirects=False)
             if "c_user" not in dict(r.cookies) or "xs" not in dict(r.cookies):
                 raise Exception("LOGIN_FAILED")
 
@@ -127,13 +111,10 @@ class Facebook:
             self.session = json.loads(session)
             self._client.cookies.update(self.session)
 
-        self._refresh_fb_dtsg()
+        await self._refresh_fb_dtsg()
 
-    def like(self, url: str):
+    async def like(self, url: str):
         headers = {
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-                "Accept-Encoding": "gzip, deflate",
-                "Accept-Language": "en-US,en;q=0.9",
                 "Referer": "https://web.facebook.com/",
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Upgrade-Insecure-Requests": "1",
@@ -142,13 +123,10 @@ class Facebook:
                 "Sec-Fetch-Site": "same-origin",
                 "Sec-Fetch-User": "?1",
         }
-        r = self._client.get(url, headers=headers)
+        r = await self._client.get(url, headers=headers)
         feedback_id = re.search(r'Plugin","feedback_id":"(.*?)"', r.text).group(1)
 
         headers = {
-            "Accept": "*/*",
-            "Accept-Encoding": "gzip, deflate",
-            "Accept-Language": "en-US,en;q=0.9",
             "Content-Type": "application/x-www-form-urlencoded",
             "Referer": "https://web.facebook.com/",
             "Sec-Fetch-Dest": "empty",
@@ -175,15 +153,12 @@ class Facebook:
             "doc_id": "6623712531077310",
             "fb_dtsg": self._fb_dtsg
         }
-        r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
+        r = await self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
         if not r.json()["data"]["feedback_react"]:
             raise Exception("LIKE_FAILED")
 
-    def comment(self, url: str, text: str):
+    async def comment(self, url: str, text: str):
         headers = {
-                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-                "Accept-Encoding": "gzip, deflate",
-                "Accept-Language": "en-US,en;q=0.9",
                 "Referer": "https://web.facebook.com/",
                 "Content-Type": "application/x-www-form-urlencoded",
                 "Upgrade-Insecure-Requests": "1",
@@ -192,13 +167,10 @@ class Facebook:
                 "Sec-Fetch-Site": "same-origin",
                 "Sec-Fetch-User": "?1",
         }
-        r = self._client.get(url, headers=headers)
+        r = await self._client.get(url, headers=headers)
         feedback_id = re.search(r'Plugin","feedback_id":"(.*?)"', r.text).group(1)
 
         headers = {
-            "Accept": "*/*",
-            "Accept-Encoding": "gzip, deflate",
-            "Accept-Language": "en-US,en;q=0.9",
             "Content-Type": "application/x-www-form-urlencoded",
             "Referer": "https://web.facebook.com/",
             "Sec-Fetch-Dest": "empty",
@@ -245,16 +217,12 @@ class Facebook:
             "doc_id": "6104498286317023",
             "fb_dtsg": self._fb_dtsg
         }
-        r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
+        r = await self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
         if not r.json()["data"]["comment_create"]:
             raise Exception("COMMENT_FAILED")
 
-    def verify(self):
+    async def verify(self):
         headers = {
-            "Accept": "*/*",
-            "Accept-Encoding": "gzip, deflate",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Content-Type": "application/x-www-form-urlencoded",
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin",
@@ -286,7 +254,7 @@ class Facebook:
             "doc_id": "6941155049285267",
             "fb_dtsg": self._fb_dtsg
         }
-        r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
+        r = await self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
         r.raise_for_status()
         business_id = r.json()["data"]["xfb_create_meta_business_account"]["id"]
 
@@ -315,19 +283,15 @@ class Facebook:
             "doc_id": "6810325559007017",
             "fb_dtsg": self._fb_dtsg
         }
-        r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
+        r = await self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
         r.raise_for_status()
 
-    def contact(self, number: str, sms: bool = False):
+    async def contact(self, number: str, sms: bool = False):
         capmonster = RecaptchaV2Task(self._capmonster_api_key)
         task_id = capmonster.create_task("https://www.fbsbx.com/captcha/recaptcha/iframe", "6Lc9qjcUAAAAADTnJq5kJMjN9aD1lxpRLMnCS2TR")
         captcha_token = capmonster.join_task_result(task_id)["gRecaptchaResponse"]
 
         headers = {
-            "Accept": "*/*",
-            "Accept-Encoding": "gzip, deflate",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Content-Type": "application/x-www-form-urlencoded",
             "Referer": "https://web.facebook.com/contacts/removal",
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
@@ -346,20 +310,17 @@ class Facebook:
             "doc_id": "7250495224992687",
             "fb_dtsg": self._fb_dtsg
         }
-        r = self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
+        r = await self._client.post("https://web.facebook.com/api/graphql", headers=headers, data=body)
         data = r.json()["data"]
         status = data["xfb_contact_removal_send_confirmation_code"]
         if status != "SUCCEED":
             raise Exception(status)
 
-    def contact_v2(self, number: str, country_code: str, sms: bool = False):
+    async def contact_v2(self, number: str, country_code: str, sms: bool = False):
         if not self._ad_act_id:
-            self._refresh_ad_act_id()
+            await self._refresh_ad_act_id()
 
         headers = {
-            "Accept": "*/*",
-            "Accept-Encoding": "gzip, deflate",
-            "Accept-Language": "en-US,en;q=0.9",
             "Content-Type": "application/x-www-form-urlencoded",
             "Referer": "https://adsmanager.facebook.com/adsmanager/manage/accounts",
             "Sec-Fetch-Dest": "empty",
@@ -384,7 +345,7 @@ class Facebook:
                 "doc_id": "10055075961232407",
                 "fb_dtsg": self._fb_dtsg
             }
-            r = self._client.post("https://adsmanager.facebook.com/api/graphql", headers=headers, data=body)
+            r = await self._client.post("https://adsmanager.facebook.com/api/graphql", headers=headers, data=body)
             serialized_state = r.json()["data"]["ixt_business_verification_advertiser_verification_wizard_trigger"]["screen"]["view_model"]["serialized_state"]
 
             variables = json.dumps({
@@ -405,7 +366,7 @@ class Facebook:
                 "doc_id": "6992119570822687",
                 "fb_dtsg": self._fb_dtsg
             }
-            r = self._client.post("https://adsmanager.facebook.com/api/graphql", headers=headers, data=body)
+            r = await self._client.post("https://adsmanager.facebook.com/api/graphql", headers=headers, data=body)
             self._serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
 
         variables = json.dumps({
@@ -424,19 +385,15 @@ class Facebook:
             "doc_id": "6992119570822687",
             "fb_dtsg": self._fb_dtsg
         }
-        r = self._client.post("https://adsmanager.facebook.com/api/graphql", headers=headers, data=body)
+        r = await self._client.post("https://adsmanager.facebook.com/api/graphql", headers=headers, data=body)
         if not r.json()["data"]["ixt_screen_next"]:
             raise Exception("PHONE_VERIFICATION_FAILED")
 
-    def contact_v3(self, number: str, country_code: str, sms: bool = False):
+    async def contact_v3(self, number: str, country_code: str, sms: bool = False):
         if not self._business_id:
-            self._refresh_business_id()
+            await self._refresh_business_id()
 
         headers = {
-            "Accept": "*/*",
-            "Accept-Encoding": "gzip, deflate",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Content-Type": "application/x-www-form-urlencoded",
             "Referer": "https://business.facebook.com/settings/security",
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
@@ -460,7 +417,7 @@ class Facebook:
                 "doc_id": "6817224355039434",
                 "fb_dtsg": self._fb_dtsg
             }
-            r = self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
+            r = await self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
             serialized_state = r.json()["data"]["ixt_business_verification_wizard_trigger"]["screen"]["view_model"]["serialized_state"]
 
             variables = json.dumps({
@@ -478,7 +435,7 @@ class Facebook:
                 "doc_id": "6615289768568483",
                 "fb_dtsg": self._fb_dtsg
             }
-            r = self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
+            r = await self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
             serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
 
             variables = json.dumps({
@@ -497,7 +454,7 @@ class Facebook:
                 "doc_id": "6615289768568483",
                 "fb_dtsg": self._fb_dtsg
             }
-            r = self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
+            r = await self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
             serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
 
             user = RandomUser()
@@ -528,7 +485,7 @@ class Facebook:
                 "doc_id": "6615289768568483",
                 "fb_dtsg": self._fb_dtsg
             }
-            r = self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
+            r = await self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
             serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
 
             variables = json.dumps({
@@ -547,7 +504,7 @@ class Facebook:
                 "doc_id": "6615289768568483",
                 "fb_dtsg": self._fb_dtsg
             }
-            r = self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
+            r = await self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
             serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
 
             variables = json.dumps({
@@ -565,7 +522,7 @@ class Facebook:
                 "doc_id": "6615289768568483",
                 "fb_dtsg": self._fb_dtsg
             }
-            r = self._client.post("https://business.facebook.com/api/graphql/", headers=headers, data=body)
+            r = await self._client.post("https://business.facebook.com/api/graphql/", headers=headers, data=body)
             self._serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
 
         variables = json.dumps({
@@ -585,12 +542,12 @@ class Facebook:
             "doc_id": "6615289768568483",
             "fb_dtsg": self._fb_dtsg
         }
-        r = self._client.post("https://business.facebook.com/api/graphql/", headers=headers, data=body)
+        r = await self._client.post("https://business.facebook.com/api/graphql/", headers=headers, data=body)
         if not r.json()["data"]["ixt_screen_next"]:
             raise Exception("PHONE_VERIFICATION_FAILED")
 
-    def __enter__(self):
+    async def __aenter__(self):
         return self
 
-    def __exit__(self, *args):
-        self._client.close()
+    async def __aexit__(self, *args):
+        await self._client.aclose()
