@@ -500,21 +500,22 @@ class Facebook:
             r = self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
             serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
 
+            user = RandomUser()
             variables = json.dumps({
                 "input": {
                     "bv_wizard_business_details_primary": {
-                        "city": ".",
+                        "city": user.get_city(),
                         "email": "",
-                        "legal_name": ".",
+                        "legal_name": user.get_full_name(),
                         "phone_number": number,
-                        "postal_code": ".",
+                        "postal_code": user.get_postcode(),
                         "social_credit_number": "",
-                        "social_media_url": "google.com",
-                        "state": ".",
-                        "street_1": ".",
-                        "street_2": ".",
+                        "social_media_url": f"https://{user.get_username()}.com",
+                        "state": user.get_state(),
+                        "street_1": user.get_street(),
+                        "street_2": "",
                         "tax_id_number": "",
-                        "website_url": "google.com",
+                        "website_url": f"https://{user.get_username()}.com",
                         "serialized_state": serialized_state
                     },
                     "actor_id": self.session.get("c_user"),
