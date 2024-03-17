@@ -20,7 +20,7 @@ class Facebook:
         self.session = None
         self._client = httpx.AsyncClient(
             proxies=f"http://{self._proxy}" if self._proxy else None,
-            timeout=httpx.Timeout(5, read=30),
+            timeout=httpx.Timeout(10, read=30),
             follow_redirects=True
         )
         ua = FakeUserAgent(browsers="chrome", platforms="pc")
