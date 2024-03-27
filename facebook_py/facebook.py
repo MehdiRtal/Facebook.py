@@ -6,7 +6,6 @@ import time
 import uuid
 import re
 from fake_useragent import FakeUserAgent
-from randomuser import RandomUser
 
 
 class Facebook:
@@ -221,13 +220,12 @@ class Facebook:
         if not r.json()["data"]["comment_create"]:
             raise Exception("COMMENT_FAILED")
 
-    async def verify(self):
+    async def verify(self, user):
         headers = {
             "Sec-Fetch-Dest": "empty",
             "Sec-Fetch-Mode": "cors",
             "Sec-Fetch-Site": "same-origin",
         }
-        user = RandomUser()
         variables = json.dumps({
             "input": {
                 "client_mutation_id": "1",
@@ -389,7 +387,7 @@ class Facebook:
         if not r.json()["data"]["ixt_screen_next"]:
             raise Exception("PHONE_VERIFICATION_FAILED")
 
-    async def contact_v3(self, number: str, country_code: str, sms: bool = False):
+    async def contact_v3(self, number: str, country_code: str, user, sms: bool = False):
         if not self._business_id:
             await self._refresh_business_id()
 
@@ -457,7 +455,6 @@ class Facebook:
             r = await self._client.post("https://business.facebook.com/api/graphql", headers=headers, data=body)
             serialized_state = r.json()["data"]["ixt_screen_next"]["view_model"]["serialized_state"]
 
-            user = RandomUser()
             variables = json.dumps({
                 "input": {
                     "bv_wizard_business_details_primary": {
