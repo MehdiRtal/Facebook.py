@@ -43,7 +43,7 @@ class Facebook:
         if "checkpoint" in str(r.url):
             raise Exception("CHECKPOINT")
         try:
-            self._fb_dtsg = re.search(r'"DTSGInitialData":{"token":"(.*?)"', r.text).group(1)
+            self._fb_dtsg = re.search(r'"DTSGInitData",\[],{"token":"(.*?)"', r.text).group(1)
         except Exception:
             raise Exception("LOGIN_FAILED")
 

@@ -13,9 +13,9 @@ anyio==4.3.0
 beautifulsoup4==4.12.3
     # via bs4
 bs4==0.0.2
-    # via twitter-py
+    # via facebook-py
 capmonster-python==2.6.2
-    # via twitter-py
+    # via facebook-py
 certifi==2024.2.2
     # via httpcore
     # via httpx
@@ -23,19 +23,19 @@ certifi==2024.2.2
 charset-normalizer==3.3.2
     # via requests
 fake-useragent==1.5.1
-    # via twitter-py
+    # via facebook-py
 h11==0.14.0
     # via httpcore
 httpcore==1.0.5
     # via httpx
 httpx==0.27.0
-    # via twitter-py
+    # via facebook-py
 idna==3.6
     # via anyio
     # via httpx
     # via requests
 randomuser==1.6
-    # via twitter-py
+    # via facebook-py
 requests==2.31.0
     # via capmonster-python
 six==1.16.0
