@@ -11,7 +11,7 @@ dependencies = [
     "capmonster-python>=2.6.2",
     "randomuser>=1.6",
 ]
-requires-python = ">= 3.12"
+requires-python = ">= 3.11"
 
 [build-system]
 requires = ["hatchling"]
